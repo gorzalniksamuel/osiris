@@ -50,7 +50,7 @@ export default function Dashboard() {
   const [showIntel, setShowIntel] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [mobilePanel, setMobilePanel] = useState<'layers'|'markets'|'intel'|'search'|null>(null);
-  const [mapProjection, setMapProjection] = useState<'globe'|'mercator'>('globe');
+  const [mapProjection, setMapProjection] = useState<'globe'|'mercator'>('mercator');
   const isMobile = useIsMobile();
   const startTime = useRef(Date.now());
   const geocodeCache = useRef<Map<string, string>>(new Map());

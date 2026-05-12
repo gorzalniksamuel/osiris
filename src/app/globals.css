@@ -196,6 +196,16 @@ html, body {
 .animate-data-pulse { animation: data-pulse 2s ease-in-out infinite; }
 .animate-threat-flash { animation: threat-flash 1.5s ease-in-out infinite; }
 
+/* Ticker scroll — pure CSS, GPU-accelerated */
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-ticker {
+  animation: ticker-scroll 30s linear infinite;
+  will-change: transform;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    MAP OVERRIDES
    ═══════════════════════════════════════════════════════════════ */

@@ -11,7 +11,6 @@ export default function GlobalStatusBar() {
   const [risks, setRisks] = useState<CountryRisk[]>([]);
   const [cyber, setCyber] = useState<any>(null);
   const [openCount, setOpenCount] = useState(0);
-  const [scrollPos, setScrollPos] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,12 +35,6 @@ export default function GlobalStatusBar() {
     return () => clearInterval(iv);
   }, []);
 
-  // Ticker scroll
-  useEffect(() => {
-    const iv = setInterval(() => setScrollPos(p => p - 0.5), 30);
-    return () => clearInterval(iv);
-  }, []);
-
   const topRisks = risks.slice(0, 6);
   const cveCount = cyber?.stats?.active_cves || 0;
 
@@ -56,58 +49,48 @@ export default function GlobalStatusBar() {
 
   if (exchanges.length === 0 && risks.length === 0) return null;
 
+  const tickerContent = (
+    <>
+      {exchanges.map(ex => (
+        <span key={ex.name} className="inline-flex items-center gap-0.5 mx-2">
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ex.open ? 'bg-[var(--alert-green)]' : 'bg-[var(--text-muted)]/30'}`} />
+          <span className={`${ex.open ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]/40'}`}>{ex.name}</span>
+        </span>
+      ))}
+      <span className="text-[var(--border-primary)] mx-1">│</span>
+      {topRisks.map(r => (
+        <span key={r.code} className="inline-flex items-center gap-0.5 mx-1.5">
+          <span className="text-[8px]">{countryFlag(r.code)}</span>
+          <span style={{ color: riskColor(r.risk_level) }} className="font-bold">{r.risk_score}</span>
+        </span>
+      ))}
+      <span className="text-[var(--border-primary)] mx-1">│</span>
+      <span className="inline-flex items-center gap-1 mx-2">
+        <span className="text-[#E040FB]">CYBER</span>
+        <span className="text-[var(--text-primary)]">{cveCount} CVEs</span>
+      </span>
+    </>
+  );
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 4, duration: 0.6 }}
-      className="absolute top-10 md:top-11 left-0 right-0 z-[199] pointer-events-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 4, duration: 0.8 }}
+      className="hidden md:block absolute top-[42px] left-0 right-0 z-[198] pointer-events-none"
     >
-      <div className="mx-auto max-w-[100vw] overflow-hidden">
-        <div className="flex items-center gap-0 h-5 text-[6px] font-mono tracking-wider">
-          {/* Exchange ticker */}
-          <div className="flex-shrink-0 bg-[var(--bg-panel)] border-y border-[var(--border-secondary)] px-2 flex items-center gap-1.5 h-full">
-            <span className="text-[var(--text-muted)]">EXCHANGES</span>
-            <span className="text-[var(--gold-primary)] font-bold">{openCount}/{exchanges.length}</span>
-          </div>
+      <div className="h-[18px] overflow-hidden bg-[var(--bg-panel)]/50 border-y border-[var(--border-secondary)]/50 flex items-center text-[6px] font-mono tracking-wider">
+        {/* Static label */}
+        <div className="flex-shrink-0 px-2 h-full flex items-center gap-1 border-r border-[var(--border-secondary)]/50 bg-[var(--bg-panel)]">
+          <span className="text-[var(--text-muted)]">MKT</span>
+          <span className="text-[var(--gold-primary)] font-bold">{openCount}/{exchanges.length}</span>
+        </div>
 
-          {/* Scrolling ticker */}
-          <div className="flex-1 bg-[var(--bg-panel)]/60 border-y border-[var(--border-secondary)] h-full overflow-hidden">
-            <div className="flex items-center h-full gap-3 whitespace-nowrap" style={{ transform: `translateX(${scrollPos}px)` }}>
-              {/* Exchange dots */}
-              {exchanges.map(ex => (
-                <span key={ex.name} className="flex items-center gap-0.5">
-                  <span className={`w-1 h-1 rounded-full ${ex.open ? 'bg-[var(--alert-green)]' : 'bg-[var(--text-muted)]/30'}`} />
-                  <span className={ex.open ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]/50'}>{ex.name}</span>
-                </span>
-              ))}
-
-              <span className="text-[var(--border-primary)]">│</span>
-
-              {/* Risk countries */}
-              {topRisks.map(r => (
-                <span key={r.code} className="flex items-center gap-0.5">
-                  <span className="text-[7px]">{countryFlag(r.code)}</span>
-                  <span style={{ color: riskColor(r.risk_level) }} className="font-bold">{r.risk_score}</span>
-                </span>
-              ))}
-
-              <span className="text-[var(--border-primary)]">│</span>
-
-              {/* Cyber */}
-              <span className="flex items-center gap-0.5">
-                <span className="text-[#E040FB]">CYBER</span>
-                <span className="text-[var(--text-primary)]">{cveCount} CVEs</span>
-              </span>
-
-              {/* Duplicate for seamless loop */}
-              {exchanges.map(ex => (
-                <span key={`d-${ex.name}`} className="flex items-center gap-0.5">
-                  <span className={`w-1 h-1 rounded-full ${ex.open ? 'bg-[var(--alert-green)]' : 'bg-[var(--text-muted)]/30'}`} />
-                  <span className={ex.open ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]/50'}>{ex.name}</span>
-                </span>
-              ))}
-            </div>
+        {/* CSS-animated ticker */}
+        <div className="flex-1 overflow-hidden relative">
+          <div className="flex items-center animate-ticker whitespace-nowrap">
+            {tickerContent}
+            {tickerContent}
           </div>
         </div>
       </div>

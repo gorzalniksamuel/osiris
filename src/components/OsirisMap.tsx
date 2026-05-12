@@ -86,39 +86,7 @@ export default function OsirisMap({ data, activeLayers, onEntityClick, onMouseCo
       style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
       center: [20, 20], zoom: 2.5, minZoom: 1.5, maxZoom: 18,
       attributionControl: false, antialias: true,
-      pitch: projection === 'globe' ? 20 : 0,
       maxPitch: 85,
-    });
-
-    // Set projection
-    map.once('style.load', () => {
-      try {
-        (map as any).setProjection({ type: projection });
-        // Add 3D terrain from Maptiler (free tier)
-        if (!map.getSource('terrain-source')) {
-          map.addSource('terrain-source', {
-            type: 'raster-dem',
-            url: 'https://demotiles.maplibre.org/terrain-tiles/tiles.json',
-            tileSize: 256,
-          });
-          map.setTerrain({ source: 'terrain-source', exaggeration: 1.5 });
-        }
-        // Atmosphere / sky for globe mode
-        if (projection === 'globe') {
-          try {
-            (map as any).setSky({
-              'sky-color': '#04040A',
-              'sky-horizon-blend': 0.4,
-              'horizon-color': '#0a0a1a',
-              'horizon-fog-blend': 0.2,
-              'fog-color': '#04040A',
-              'fog-ground-blend': 0.8,
-            });
-          } catch {}
-        }
-      } catch(e) {
-        console.warn('Globe/terrain not supported:', e);
-      }
     });
 
     map.on('load', () => {
@@ -493,6 +461,32 @@ export default function OsirisMap({ data, activeLayers, onEntityClick, onMouseCo
     if (!mapReady || !mapRef.current || !flyToLocation) return;
     mapRef.current.flyTo({ center: [flyToLocation.lng, flyToLocation.lat], zoom: 8, duration: 2000 });
   }, [mapReady, flyToLocation]);
+
+  // Dynamic projection switching (lightweight — no terrain DEM)
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return;
+    const map = mapRef.current;
+    try {
+      (map as any).setProjection({ type: projection });
+      if (projection === 'globe') {
+        map.easeTo({ pitch: 20, duration: 1200 });
+        try {
+          (map as any).setSky({
+            'sky-color': '#04040A',
+            'sky-horizon-blend': 0.5,
+            'horizon-color': '#0a0a1a',
+            'horizon-fog-blend': 0.3,
+            'fog-color': '#04040A',
+            'fog-ground-blend': 0.9,
+          });
+        } catch {}
+      } else {
+        map.easeTo({ pitch: 0, duration: 800 });
+      }
+    } catch (e) {
+      console.warn('Projection switch failed:', e);
+    }
+  }, [mapReady, projection]);
 
   return <div ref={containerRef} className="absolute inset-0 w-full h-full" />;
 }
