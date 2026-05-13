@@ -282,6 +282,47 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, [mouseCoords?.lat, mouseCoords?.lng, activeLayers.cctv]);
 
+  // ── REACTIVE: Fetch data when layers are toggled ON ──
+  const prevLayersRef = useRef(activeLayers);
+  useEffect(() => {
+    const prev = prevLayersRef.current;
+    prevLayersRef.current = activeLayers;
+
+    const fetchEndpoint = async (url: string, transform?: (d: any) => any) => {
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          const json = await res.json();
+          const d = transform ? transform(json) : json;
+          dataRef.current = { ...dataRef.current, ...d };
+          setDataVersion(v => v + 1);
+        }
+      } catch {}
+    };
+
+    // Flights: any flight layer turned ON
+    const anyFlightNow = activeLayers.flights || activeLayers.military || activeLayers.jets || activeLayers.private;
+    const anyFlightBefore = prev.flights || prev.military || prev.jets || prev.private;
+    if (anyFlightNow && !anyFlightBefore && !dataRef.current.commercial_flights) {
+      fetchEndpoint('/api/flights');
+    }
+
+    // CCTV turned ON
+    if (activeLayers.cctv && !prev.cctv && !dataRef.current.cameras?.length) {
+      fetchEndpoint('/api/cctv?region=all');
+    }
+
+    // Fires turned ON
+    if (activeLayers.fires && !prev.fires && !dataRef.current.fires?.length) {
+      fetchEndpoint('/api/fires');
+    }
+
+    // Satellites turned ON
+    if (activeLayers.satellites && !prev.satellites && !dataRef.current.satellites?.length) {
+      fetchEndpoint('/api/satellites');
+    }
+  }, [activeLayers]);
+
   const totalFlights = (data.commercial_flights?.length||0)+(data.private_flights?.length||0)+(data.private_jets?.length||0)+(data.military_flights?.length||0);
 
   // Dynamic Threat Level based on active global incidents
