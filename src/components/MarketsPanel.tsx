@@ -45,7 +45,7 @@ export default function MarketsPanel({ data, spaceWeather }: MarketsPanelProps) 
       <button onClick={() => setExpanded(!expanded)} className="flex items-center justify-between w-full mb-2">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-3.5 h-3.5 text-[var(--gold-primary)]" />
-          <span className="hud-text text-[11px] text-[var(--text-primary)]">MARKETS & INTEL</span>
+          <span className="hud-text text-[14px] text-[var(--text-primary)]">MARKETS & INTEL</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-[var(--alert-green)] animate-osiris-pulse" />
@@ -62,7 +62,7 @@ export default function MarketsPanel({ data, spaceWeather }: MarketsPanelProps) 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <Zap className="w-3 h-3" style={{ color: spaceWeather.storm_color }} />
-                    <span className="text-[9px] font-mono tracking-widest text-[var(--text-muted)]">SPACE WEATHER</span>
+                    <span className="text-[10px] font-mono tracking-widest text-[var(--text-muted)]">SPACE WEATHER</span>
                   </div>
                   <span className="text-[10px] font-mono font-bold" style={{ color: spaceWeather.storm_color }}>
                     Kp {spaceWeather.kp_index} — {spaceWeather.storm_level}

@@ -228,18 +228,47 @@ async function fetchEuropeCameras(): Promise<any[]> {
   return cams.filter((c: any) => c.lat && c.lng);
 }
 
-// ── ASIA/PACIFIC ──
+// ── ASIA/PACIFIC + AUSTRALIA ──
 async function fetchAsiaCameras(): Promise<any[]> {
   const curated = [
+    // Japan
     { id: 'tok-1', lat: 35.6595, lng: 139.7004, name: 'Shibuya Crossing', city: 'Tokyo', country: 'Japan', feed_url: 'https://www.shibuya.webcam', source: 'Public' },
     { id: 'tok-2', lat: 35.6762, lng: 139.6503, name: 'Shinjuku Station', city: 'Tokyo', country: 'Japan', feed_url: 'https://www.jartic.or.jp', source: 'JARTIC' },
-    { id: 'syd-1', lat: -33.8688, lng: 151.2093, name: 'Sydney Harbour Bridge', city: 'Sydney', country: 'Australia', feed_url: 'https://www.livetraffic.com', source: 'TfNSW' },
+    // Singapore
     { id: 'sin-1', lat: 1.3521, lng: 103.8198, name: 'Marina Bay Sands', city: 'Singapore', country: 'Singapore', feed_url: 'https://onemotoring.lta.gov.sg/content/onemotoring/home/driving/traffic_information/traffic-cameras.html', source: 'LTA' },
+    // Hong Kong
     { id: 'hk-1', lat: 22.3193, lng: 114.1694, name: 'Victoria Harbour', city: 'Hong Kong', country: 'China', feed_url: 'https://tdcctv.data.one.gov.hk', source: 'HK TD' },
+    // South Korea
     { id: 'sel-1', lat: 37.5665, lng: 126.9780, name: 'Gwanghwamun Square', city: 'Seoul', country: 'South Korea', feed_url: 'https://www.utic.go.kr', source: 'UTIC' },
+    // UAE
     { id: 'dub-1', lat: 25.2048, lng: 55.2708, name: 'Sheikh Zayed Road', city: 'Dubai', country: 'UAE', feed_url: 'https://www.rta.ae', source: 'RTA Dubai' },
+    // India
     { id: 'mum-1', lat: 19.0760, lng: 72.8777, name: 'Marine Drive', city: 'Mumbai', country: 'India', feed_url: 'https://trafficinfo.gov.in', source: 'MMRDA' },
     { id: 'bng-1', lat: 13.0827, lng: 80.2707, name: 'Anna Salai', city: 'Chennai', country: 'India', feed_url: 'https://trafficinfo.gov.in', source: 'TN Police' },
+    // ── Australia ──
+    // Sydney / NSW
+    { id: 'au-syd-1', lat: -33.8688, lng: 151.2093, name: 'Sydney Harbour Bridge', city: 'Sydney', country: 'Australia', feed_url: 'https://www.livetraffic.com/desktop/cameras', source: 'TfNSW' },
+    { id: 'au-syd-2', lat: -33.8580, lng: 151.2100, name: 'Circular Quay / Opera House', city: 'Sydney', country: 'Australia', feed_url: 'https://www.livetraffic.com/desktop/cameras', source: 'TfNSW' },
+    { id: 'au-syd-3', lat: -33.8830, lng: 151.2010, name: 'Anzac Bridge Approach', city: 'Sydney', country: 'Australia', feed_url: 'https://www.livetraffic.com/desktop/cameras', source: 'TfNSW' },
+    { id: 'au-syd-4', lat: -33.9200, lng: 151.1900, name: 'M5 East Tunnel', city: 'Sydney', country: 'Australia', feed_url: 'https://www.livetraffic.com/desktop/cameras', source: 'TfNSW' },
+    { id: 'au-syd-5', lat: -33.7950, lng: 151.1830, name: 'Lane Cove Tunnel', city: 'Sydney', country: 'Australia', feed_url: 'https://www.livetraffic.com/desktop/cameras', source: 'TfNSW' },
+    // Melbourne / VIC
+    { id: 'au-mel-1', lat: -37.8136, lng: 144.9631, name: 'Flinders St / Swanston', city: 'Melbourne', country: 'Australia', feed_url: 'https://traffic.vicroads.vic.gov.au', source: 'VicRoads' },
+    { id: 'au-mel-2', lat: -37.8180, lng: 144.9520, name: 'Kings Way / Southbank', city: 'Melbourne', country: 'Australia', feed_url: 'https://traffic.vicroads.vic.gov.au', source: 'VicRoads' },
+    { id: 'au-mel-3', lat: -37.7900, lng: 144.9600, name: 'Tullamarine Fwy', city: 'Melbourne', country: 'Australia', feed_url: 'https://traffic.vicroads.vic.gov.au', source: 'VicRoads' },
+    { id: 'au-mel-4', lat: -37.8400, lng: 145.0000, name: 'Monash Fwy / Toorak', city: 'Melbourne', country: 'Australia', feed_url: 'https://traffic.vicroads.vic.gov.au', source: 'VicRoads' },
+    // Brisbane / QLD
+    { id: 'au-bne-1', lat: -27.4698, lng: 153.0251, name: 'Story Bridge', city: 'Brisbane', country: 'Australia', feed_url: 'https://qldtraffic.qld.gov.au/cameras.html', source: 'QLD Traffic' },
+    { id: 'au-bne-2', lat: -27.4750, lng: 153.0200, name: 'Captain Cook Bridge', city: 'Brisbane', country: 'Australia', feed_url: 'https://qldtraffic.qld.gov.au/cameras.html', source: 'QLD Traffic' },
+    // Perth / WA
+    { id: 'au-per-1', lat: -31.9505, lng: 115.8605, name: 'Mitchell Fwy / CBD', city: 'Perth', country: 'Australia', feed_url: 'https://www.mainroads.wa.gov.au/travel-information/cameras/', source: 'Main Roads WA' },
+    { id: 'au-per-2', lat: -31.9700, lng: 115.8800, name: 'Kwinana Fwy / South Perth', city: 'Perth', country: 'Australia', feed_url: 'https://www.mainroads.wa.gov.au/travel-information/cameras/', source: 'Main Roads WA' },
+    // Adelaide / SA
+    { id: 'au-adl-1', lat: -34.9285, lng: 138.6007, name: 'North Terrace / CBD', city: 'Adelaide', country: 'Australia', feed_url: 'https://traffic.sa.gov.au', source: 'DIT SA' },
+    // Gold Coast
+    { id: 'au-gc-1', lat: -28.0167, lng: 153.4000, name: 'Surfers Paradise Esplanade', city: 'Gold Coast', country: 'Australia', feed_url: 'https://qldtraffic.qld.gov.au/cameras.html', source: 'QLD Traffic' },
+    // Canberra
+    { id: 'au-cbr-1', lat: -35.2809, lng: 149.1300, name: 'Commonwealth Ave Bridge', city: 'Canberra', country: 'Australia', feed_url: 'https://www.tccs.act.gov.au/roads-paths/traffic/traffic-cameras', source: 'ACT TCCS' },
   ];
   return curated;
 }
@@ -270,8 +299,10 @@ function getRegionsForBounds(lat: number, lng: number, radius: number): string[]
   if (lat > 42 && lat < 70 && lng > -141 && lng < -52) regions.push('canada');
   // Europe
   if (lat > 35 && lat < 72 && lng > -11 && lng < 40) regions.push('europe');
-  // Asia
-  if ((lat > -10 && lat < 60 && lng > 60 && lng < 150) || (lat > -50 && lat < -10 && lng > 100 && lng < 180)) regions.push('asia');
+  // Asia (includes Middle East, SE Asia)
+  if ((lat > -10 && lat < 60 && lng > 60 && lng < 150)) regions.push('asia');
+  // Australia explicitly
+  if (lat > -45 && lat < -10 && lng > 110 && lng < 155) regions.push('asia');
   
   return regions.length > 0 ? regions : ['uk', 'us-east']; // Default fallback
 }

@@ -25,30 +25,36 @@ export default function LiveAlerts({ data, onLocate, onWatchFeed }: LiveAlertsPr
   const [expanded, setExpanded] = useState(false);
   const [filter, setFilter] = useState<'all' | 'news' | 'quakes' | 'feeds'>('all');
 
-  // Built-in major news outlets (always available — no API needed)
+  // Built-in live feeds — verified video IDs (synced with /api/live-news)
   const BUILTIN_FEEDS = [
-    { name: 'CNN', city: 'Atlanta', country: 'US', lat: 33.749, lng: -84.388, url: 'https://www.youtube.com/embed/h3MuIUNCCzI?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'Fox News', city: 'New York', country: 'US', lat: 40.758, lng: -73.977, url: 'https://www.youtube.com/embed/FaWMOfzBDHg?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'MSNBC', city: 'New York', country: 'US', lat: 40.750, lng: -73.993, url: 'https://www.youtube.com/embed/Inga0sD3CDC?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'ABC News', city: 'New York', country: 'US', lat: 40.763, lng: -73.980, url: 'https://www.youtube.com/embed/YVC51PiB5dw?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'CBS News', city: 'New York', country: 'US', lat: 40.764, lng: -73.973, url: 'https://www.youtube.com/embed/plqUofeNLhY?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'NBC News', city: 'New York', country: 'US', lat: 40.759, lng: -73.980, url: 'https://www.youtube.com/embed/Y1bBN2Y8U5A?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'Bloomberg', city: 'New York', country: 'US', lat: 40.756, lng: -73.988, url: 'https://www.youtube.com/embed/dp8PhLsUcFE?autoplay=1&mute=1', category: 'finance' },
-    { name: 'C-SPAN', city: 'Washington DC', country: 'US', lat: 38.897, lng: -77.036, url: 'https://www.youtube.com/embed/W6XkMAmRg9k?autoplay=1&mute=1', category: 'government' },
-    { name: 'CBC News', city: 'Toronto', country: 'CA', lat: 43.644, lng: -79.387, url: 'https://www.youtube.com/embed/65sR4KKWG8Y?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'BBC World', city: 'London', country: 'GB', lat: 51.518, lng: -0.144, url: 'https://www.youtube.com/embed/drx0bkFBbto?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'Sky News', city: 'London', country: 'GB', lat: 51.500, lng: -0.118, url: 'https://www.youtube.com/embed/9Auq9mYxFEE?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'France 24', city: 'Paris', country: 'FR', lat: 48.830, lng: 2.280, url: 'https://www.youtube.com/embed/u9AvMNuMFDQ?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'DW News', city: 'Berlin', country: 'DE', lat: 52.508, lng: 13.376, url: 'https://www.youtube.com/embed/pqabxBKzZ6Y?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'Euronews', city: 'Lyon', country: 'FR', lat: 45.764, lng: 4.836, url: 'https://www.youtube.com/embed/sPGepgWupTM?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'Al Jazeera', city: 'Doha', country: 'QA', lat: 25.286, lng: 51.534, url: 'https://www.youtube.com/embed/F-POY4Q0KSI?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'i24NEWS', city: 'Tel Aviv', country: 'IL', lat: 32.085, lng: 34.781, url: 'https://www.youtube.com/embed/vVXM77F66aI?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'TRT World', city: 'Istanbul', country: 'TR', lat: 41.008, lng: 28.978, url: 'https://www.youtube.com/embed/CV5Fooi1XGQ?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'NHK World', city: 'Tokyo', country: 'JP', lat: 35.690, lng: 139.692, url: 'https://www.youtube.com/embed/f0lYkdA-Kx0?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'CNA', city: 'Singapore', country: 'SG', lat: 1.290, lng: 103.852, url: 'https://www.youtube.com/embed/XWq5kBlakcQ?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'WION', city: 'New Delhi', country: 'IN', lat: 28.614, lng: 77.209, url: 'https://www.youtube.com/embed/itnOYTaJCuQ?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'Arirang TV', city: 'Seoul', country: 'KR', lat: 37.566, lng: 126.978, url: 'https://www.youtube.com/embed/JCM4dDPmrnA?autoplay=1&mute=1', category: 'mainstream' },
-    { name: 'Africanews', city: 'Pointe-Noire', country: 'CG', lat: -4.778, lng: 11.865, url: 'https://www.youtube.com/embed/NJwVzo7mBgc?autoplay=1&mute=1', category: 'mainstream' },
+    // ── North America ──
+    { name: 'NBC News NOW', city: 'New York', country: 'US', lat: 40.759, lng: -73.980, url: 'https://www.youtube.com/embed/JnCHHW_YBp8?autoplay=1&mute=1', category: 'mainstream', region: 'americas' },
+    { name: 'CBS News 24/7', city: 'New York', country: 'US', lat: 40.764, lng: -73.973, url: 'https://www.youtube.com/embed/4b71rT9fU-k?autoplay=1&mute=1', category: 'mainstream', region: 'americas' },
+    { name: 'ABC News Live', city: 'New York', country: 'US', lat: 40.763, lng: -73.979, url: 'https://www.youtube.com/embed/gCNeDWCI0vo?autoplay=1&mute=1', category: 'mainstream', region: 'americas' },
+    { name: 'Bloomberg TV', city: 'New York', country: 'US', lat: 40.756, lng: -73.988, url: 'https://www.youtube.com/embed/dp8PhLsUcFE?autoplay=1&mute=1', category: 'finance', region: 'americas' },
+    { name: 'C-SPAN', city: 'Washington DC', country: 'US', lat: 38.897, lng: -77.036, url: 'https://www.youtube.com/embed/VRhIkGxhIMY?autoplay=1&mute=1', category: 'government', region: 'americas' },
+    { name: 'CBC News', city: 'Toronto', country: 'CA', lat: 43.644, lng: -79.387, url: 'https://www.youtube.com/embed/65sR4KKWG8Y?autoplay=1&mute=1', category: 'mainstream', region: 'americas' },
+    // ── Europe ──
+    { name: 'Sky News', city: 'London', country: 'GB', lat: 51.500, lng: -0.118, url: 'https://www.youtube.com/embed/9Auq9mYxFEE?autoplay=1&mute=1', category: 'mainstream', region: 'europe' },
+    { name: 'France 24 EN', city: 'Paris', country: 'FR', lat: 48.830, lng: 2.280, url: 'https://www.youtube.com/embed/h3MuIUNCCzI?autoplay=1&mute=1', category: 'mainstream', region: 'europe' },
+    { name: 'DW News', city: 'Berlin', country: 'DE', lat: 52.508, lng: 13.376, url: 'https://www.youtube.com/embed/GE_SfNVNyqk?autoplay=1&mute=1', category: 'mainstream', region: 'europe' },
+    { name: 'Euronews', city: 'Lyon', country: 'FR', lat: 45.764, lng: 4.836, url: 'https://www.youtube.com/embed/pykpO5kQJ98?autoplay=1&mute=1', category: 'mainstream', region: 'europe' },
+    { name: 'TRT World', city: 'Istanbul', country: 'TR', lat: 41.008, lng: 28.978, url: 'https://www.youtube.com/embed/CV5Fooi1XGQ?autoplay=1&mute=1', category: 'mainstream', region: 'europe' },
+    { name: 'UKRINFORM', city: 'Kyiv', country: 'UA', lat: 50.450, lng: 30.523, url: 'https://www.youtube.com/embed/jNZM_H6q1rY?autoplay=1&mute=1', category: 'conflict', region: 'europe' },
+    // ── Middle East ──
+    { name: 'Al Jazeera EN', city: 'Doha', country: 'QA', lat: 25.286, lng: 51.534, url: 'https://www.youtube.com/embed/F-POY4Q0KSI?autoplay=1&mute=1', category: 'mainstream', region: 'middleeast' },
+    { name: 'i24NEWS EN', city: 'Tel Aviv', country: 'IL', lat: 32.085, lng: 34.781, url: 'https://www.youtube.com/embed/LH4MzFoXYOw?autoplay=1&mute=1', category: 'mainstream', region: 'middleeast' },
+    // ── Asia Pacific ──
+    { name: 'NHK World', city: 'Tokyo', country: 'JP', lat: 35.690, lng: 139.692, url: 'https://www.youtube.com/embed/f0lYkdA-Kx0?autoplay=1&mute=1', category: 'mainstream', region: 'asia' },
+    { name: 'CNA 24/7', city: 'Singapore', country: 'SG', lat: 1.290, lng: 103.852, url: 'https://www.youtube.com/embed/XWq5kBlakcQ?autoplay=1&mute=1', category: 'mainstream', region: 'asia' },
+    { name: 'WION', city: 'New Delhi', country: 'IN', lat: 28.614, lng: 77.209, url: 'https://www.youtube.com/embed/U1RYpeWGUas?autoplay=1&mute=1', category: 'mainstream', region: 'asia' },
+    { name: 'Arirang', city: 'Seoul', country: 'KR', lat: 37.566, lng: 126.978, url: 'https://www.youtube.com/embed/JCM4dDPmrnA?autoplay=1&mute=1', category: 'mainstream', region: 'asia' },
+    { name: 'ABC AU', city: 'Sydney', country: 'AU', lat: -33.868, lng: 151.209, url: 'https://www.youtube.com/embed/W1ilCy6XrmI?autoplay=1&mute=1', category: 'mainstream', region: 'asia' },
+    // ── Africa ──
+    { name: 'Africanews', city: 'Pointe-Noire', country: 'CG', lat: -4.778, lng: 11.865, url: 'https://www.youtube.com/embed/NJwVzo7mBgc?autoplay=1&mute=1', category: 'mainstream', region: 'africa' },
+    { name: 'SABC News', city: 'Johannesburg', country: 'ZA', lat: -26.204, lng: 28.047, url: 'https://www.youtube.com/embed/NwN04K8JXOI?autoplay=1&mute=1', category: 'mainstream', region: 'africa' },
+    // ── Latin America ──
+    { name: 'teleSUR EN', city: 'Caracas', country: 'VE', lat: 10.491, lng: -66.902, url: 'https://www.youtube.com/embed/4G7RgMuUkfQ?autoplay=1&mute=1', category: 'mainstream', region: 'americas' },
   ];
 
   // Build unified alert feed

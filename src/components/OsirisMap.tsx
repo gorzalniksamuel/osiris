@@ -107,8 +107,77 @@ export default function OsirisMap({ data, activeLayers, onEntityClick, onMouseCo
       createDot(map, 'dot-cctv', '#39FF14', 10);
 
       // Sources
-      const sources = ['flights','military','jets','private-fl','satellites','earthquakes','gdelt','gps-jamming','day-night','cctv','fires','weather','infrastructure','maritime','maritime-choke','live-news'];
+      const sources = ['flights','military','jets','private-fl','satellites','earthquakes','gdelt','gps-jamming','day-night','cctv','fires','weather','infrastructure','maritime','maritime-choke','live-news','conflict-zones'];
       sources.forEach(s => map.addSource(s, { type: 'geojson', data: EMPTY_FC }));
+
+      // ── CONFLICT ZONES — small warning markers (not polygons) ──
+      // Create warning triangle icon
+      const warnSize = 20;
+      const warnCanvas = document.createElement('canvas');
+      warnCanvas.width = warnSize; warnCanvas.height = warnSize;
+      const warnCtx = warnCanvas.getContext('2d')!;
+      // Triangle
+      warnCtx.fillStyle = '#FF1744';
+      warnCtx.beginPath();
+      warnCtx.moveTo(warnSize/2, 1);
+      warnCtx.lineTo(warnSize - 1, warnSize - 1);
+      warnCtx.lineTo(1, warnSize - 1);
+      warnCtx.closePath();
+      warnCtx.fill();
+      // Exclamation mark
+      warnCtx.fillStyle = '#000';
+      warnCtx.font = 'bold 11px sans-serif';
+      warnCtx.textAlign = 'center';
+      warnCtx.fillText('!', warnSize/2, warnSize - 4);
+      map.addImage('warn-icon', { width: warnSize, height: warnSize, data: new Uint8Array(warnCtx.getImageData(0, 0, warnSize, warnSize).data) });
+
+      // Orange warning
+      const warnOCanvas = document.createElement('canvas');
+      warnOCanvas.width = warnSize; warnOCanvas.height = warnSize;
+      const warnOCtx = warnOCanvas.getContext('2d')!;
+      warnOCtx.fillStyle = '#FF9500';
+      warnOCtx.beginPath();
+      warnOCtx.moveTo(warnSize/2, 1);
+      warnOCtx.lineTo(warnSize - 1, warnSize - 1);
+      warnOCtx.lineTo(1, warnSize - 1);
+      warnOCtx.closePath();
+      warnOCtx.fill();
+      warnOCtx.fillStyle = '#000';
+      warnOCtx.font = 'bold 11px sans-serif';
+      warnOCtx.textAlign = 'center';
+      warnOCtx.fillText('!', warnSize/2, warnSize - 4);
+      map.addImage('warn-orange', { width: warnSize, height: warnSize, data: new Uint8Array(warnOCtx.getImageData(0, 0, warnSize, warnSize).data) });
+
+      // Yellow warning
+      const warnYCanvas = document.createElement('canvas');
+      warnYCanvas.width = warnSize; warnYCanvas.height = warnSize;
+      const warnYCtx = warnYCanvas.getContext('2d')!;
+      warnYCtx.fillStyle = '#FFD500';
+      warnYCtx.beginPath();
+      warnYCtx.moveTo(warnSize/2, 1);
+      warnYCtx.lineTo(warnSize - 1, warnSize - 1);
+      warnYCtx.lineTo(1, warnSize - 1);
+      warnYCtx.closePath();
+      warnYCtx.fill();
+      warnYCtx.fillStyle = '#000';
+      warnYCtx.font = 'bold 11px sans-serif';
+      warnYCtx.textAlign = 'center';
+      warnYCtx.fillText('!', warnSize/2, warnSize - 4);
+      map.addImage('warn-yellow', { width: warnSize, height: warnSize, data: new Uint8Array(warnYCtx.getImageData(0, 0, warnSize, warnSize).data) });
+
+      map.addLayer({ id: 'conflict-icons', type: 'symbol', source: 'conflict-zones', layout: {
+        'icon-image': ['match', ['get','severity'], 'war','warn-icon', 'high','warn-orange', 'warn-yellow'],
+        'icon-size': ['interpolate',['linear'],['zoom'], 1,0.6, 4,0.8, 8,1],
+        'icon-allow-overlap': true,
+        'text-field': ['get','label'],
+        'text-size': ['interpolate',['linear'],['zoom'], 1,7, 4,9, 8,11],
+        'text-font': ['Open Sans Bold'],
+        'text-offset': [0, 1.4],
+        'text-allow-overlap': false,
+      }, paint: {
+        'text-color': ['match', ['get','severity'], 'war','#FF1744', 'high','#FF9500', '#FFD500'],
+        'text-halo-color': '#000', 'text-halo-width': 1.5, 'text-opacity': 0.9,
+      }});
 
       // Day/Night
       map.addLayer({ id: 'day-night-fill', type: 'fill', source: 'day-night', paint: { 'fill-color': '#000022', 'fill-opacity': 0.35 }});
@@ -532,6 +601,29 @@ export default function OsirisMap({ data, activeLayers, onEntityClick, onMouseCo
     setGeo('maritime', activeLayers.maritime && data.maritime_ports ? data.maritime_ports.map((p: any) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [p.lng, p.lat] }, properties: { name: p.name, country: p.country, type: p.type, volume: p.volume, fleet: p.fleet, rank: p.rank } })) : []);
     setGeo('maritime-choke', activeLayers.maritime && data.maritime_chokepoints ? data.maritime_chokepoints.map((c: any) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [c.lng, c.lat] }, properties: { name: c.name, traffic: c.traffic, risk: c.risk } })) : []);
     setGeo('live-news', activeLayers.live_news && data.live_feeds ? data.live_feeds.map((f: any) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [f.lng, f.lat] }, properties: { name: f.name, city: f.city, country: f.country, url: f.url, category: f.category } })) : []);
+
+    // ── CONFLICT ZONES — center-point warning markers ──
+    const CONFLICT_ZONES = [
+      { label: 'UKRAINE WAR', severity: 'war', lat: 48.5, lng: 31.2 },
+      { label: 'GAZA CONFLICT', severity: 'war', lat: 31.35, lng: 34.35 },
+      { label: 'LEBANON BORDER', severity: 'high', lat: 33.4, lng: 35.8 },
+      { label: 'SUDAN CIVIL WAR', severity: 'war', lat: 15.0, lng: 30.0 },
+      { label: 'MYANMAR CONFLICT', severity: 'war', lat: 19.5, lng: 96.5 },
+      { label: 'DRC EASTERN CONFLICT', severity: 'war', lat: -1.0, lng: 28.5 },
+      { label: 'YEMEN WAR', severity: 'war', lat: 15.5, lng: 48.0 },
+      { label: 'SYRIA', severity: 'high', lat: 35.0, lng: 38.5 },
+      { label: 'TAIWAN STRAIT', severity: 'elevated', lat: 24.0, lng: 119.5 },
+      { label: 'KOREAN DMZ', severity: 'elevated', lat: 38.3, lng: 127.0 },
+      { label: 'SAHEL INSTABILITY', severity: 'high', lat: 14.0, lng: 5.0 },
+      { label: 'SOMALIA', severity: 'high', lat: 5.0, lng: 46.0 },
+      { label: 'RED SEA THREAT', severity: 'high', lat: 16.0, lng: 40.0 },
+    ];
+    const conflictFeatures = CONFLICT_ZONES.map(z => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [z.lng, z.lat] },
+      properties: { label: z.label, severity: z.severity },
+    }));
+    setGeo('conflict-zones', conflictFeatures);
   }, [mapReady, data, activeLayers]);
 
   // Visibility

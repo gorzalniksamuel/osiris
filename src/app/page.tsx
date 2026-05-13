@@ -408,12 +408,16 @@ export default function Dashboard() {
       </motion.div>
 
       {/* ── TOP-RIGHT STATUS (desktop) ── */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3 }} className="status-bar-desktop absolute top-3 right-3 md:top-4 md:right-5 z-[200] pointer-events-none flex items-center gap-2 md:gap-4 text-[8px] md:text-[9px] font-mono tracking-widest text-[var(--text-muted)]">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3 }} className="status-bar-desktop absolute top-3 right-3 md:top-4 md:right-5 z-[200] pointer-events-none flex items-center gap-2 md:gap-4 text-[9px] md:text-[10px] font-mono tracking-widest text-[var(--text-muted)]">
         <span>SYS: <span className={backendStatus === 'connected' ? 'text-[var(--alert-green)]' : 'text-[var(--alert-red)]'}>{backendStatus.toUpperCase()}</span></span>
-        <span>THREAT: <span style={{ color: threatColor, fontWeight: 700 }} className={threatLevel === 'CRITICAL' ? 'animate-threat-flash' : ''}>{threatLevel}</span></span>
+        <span className="pointer-events-auto relative group" title="Global Threat Assessment — based on active earthquakes M5+, severe weather, GDELT conflicts, and wildfires">GLOBAL THREAT: <span style={{ color: threatColor, fontWeight: 700 }} className={threatLevel === 'CRITICAL' ? 'animate-threat-flash' : ''}>{threatLevel}</span>
+          <span className="absolute bottom-full right-0 mb-2 hidden group-hover:block glass-panel px-3 py-2 text-[9px] text-[var(--text-secondary)] whitespace-nowrap z-[500] pointer-events-none" style={{ borderColor: `${threatColor}40` }}>
+            Global Threat Level — Composite score from earthquakes, severe weather, conflicts & fires
+          </span>
+        </span>
         {spaceWeather && <span className="hidden lg:inline">SOLAR: <span style={{ color: spaceWeather.storm_color, fontWeight: 700 }}>Kp{spaceWeather.kp_index}</span></span>}
         <span className="hidden lg:inline">UPTIME: <span className="text-[var(--gold-primary)]">{uptime}</span></span>
-        <span>V3.4</span>
+        <span>V4.1</span>
       </motion.div>
 
       {/* ── MOBILE: Compact top status ── */}

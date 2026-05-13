@@ -45,10 +45,10 @@ export default function LayerPanel({ data, activeLayers, setActiveLayers }: Laye
       <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-2">
           <Eye className="w-3.5 h-3.5 text-[var(--gold-primary)]" />
-          <span className="hud-text text-[12px] text-[var(--text-primary)]">DATA LAYERS</span>
+          <span className="hud-text text-[14px] text-[var(--text-primary)]">DATA LAYERS</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-mono text-[var(--text-muted)]">{activeCount}/{LAYER_CONFIG.length} ACTIVE · {totalEntities.toLocaleString()} ENTITIES</span>
+          <span className="text-[10px] font-mono text-[var(--text-muted)]">{activeCount}/{LAYER_CONFIG.length} ACTIVE · {totalEntities.toLocaleString()} ENTITIES</span>
           <div className="w-1.5 h-1.5 rounded-full bg-[var(--alert-green)] animate-osiris-pulse" />
         </div>
       </div>
@@ -59,9 +59,9 @@ export default function LayerPanel({ data, activeLayers, setActiveLayers }: Laye
           const count = getCount(layer.dataKey);
           return (
             <button key={layer.key} onClick={() => toggle(layer.key)} className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-all duration-200 ${isActive ? 'bg-[var(--hover-accent)] border border-[var(--border-primary)]' : 'border border-transparent hover:bg-[var(--hover-accent)]'}`}>
-              <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: isActive ? layer.color : 'var(--text-muted)' }} />
-              <span className={`text-[10px] font-mono tracking-wider flex-1 text-left ${isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>{layer.label}</span>
-              {count !== null && <span className="text-[9px] font-mono tabular-nums" style={{ color: isActive ? layer.color : 'var(--text-muted)' }}>{count.toLocaleString()}</span>}
+              <Icon className="w-4 h-4 flex-shrink-0" style={{ color: isActive ? layer.color : 'var(--text-muted)' }} />
+              <span className={`text-[12px] font-mono tracking-wider flex-1 text-left ${isActive ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>{layer.label}</span>
+              {count !== null && <span className="text-[10px] font-mono tabular-nums" style={{ color: isActive ? layer.color : 'var(--text-muted)' }}>{count.toLocaleString()}</span>}
               <div className={`layer-toggle ${isActive ? 'active' : ''}`} />
             </button>
           );
