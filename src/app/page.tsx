@@ -4,22 +4,22 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layers, BarChart3, Newspaper, Search, Share2, Map as MapIcon, X, Globe, MapPinned, Radar, Satellite, Moon, ExternalLink, AlertTriangle, Building2 } from 'lucide-react';
-import LayerPanel from '@/components/LayerPanel';
 import IntelFeed from '@/components/IntelFeed';
 import MarketsPanel from '@/components/MarketsPanel';
 import SearchBar from '@/components/SearchBar';
 import ScaleBar from '@/components/ScaleBar';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import CameraViewer from '@/components/CameraViewer';
 import SharePanel from '@/components/SharePanel';
 import ViewPresets from '@/components/ViewPresets';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
 import GlobalStatusBar from '@/components/GlobalStatusBar';
-import OsintPanel from '@/components/OsintPanel';
-import CompanyIntel from '@/components/CompanyIntel';
 import LiveAlerts from '@/components/LiveAlerts';
 
 const OsirisMap = dynamic(() => import('@/components/OsirisMap'), { ssr: false });
+const LayerPanel = dynamic(() => import('@/components/LayerPanel'));
+const CameraViewer = dynamic(() => import('@/components/CameraViewer'));
+const OsintPanel = dynamic(() => import('@/components/OsintPanel'));
+const CompanyIntel = dynamic(() => import('@/components/CompanyIntel'));
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
