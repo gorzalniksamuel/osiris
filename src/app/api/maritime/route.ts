@@ -1,79 +1,191 @@
-import { NextResponse } from 'next/server';
-
 /**
- * OSIRIS — Maritime Intelligence
- * Major global ports, naval bases, and shipping chokepoints.
- * Static dataset — zero external API calls.
+ * OSIRIS — Maritime/AIS Tracking API
+ * Fetches real-time ship positions via AIS data simulation
  */
 
-const PORTS = [
-  // ── Top Container Ports ──
-  { name: 'Shanghai', country: 'CN', lat: 31.23, lng: 121.47, type: 'container', volume: '47.3M TEU', rank: 1 },
-  { name: 'Singapore', country: 'SG', lat: 1.26, lng: 103.84, type: 'container', volume: '37.2M TEU', rank: 2 },
-  { name: 'Ningbo-Zhoushan', country: 'CN', lat: 29.87, lng: 121.55, type: 'container', volume: '33.3M TEU', rank: 3 },
-  { name: 'Shenzhen', country: 'CN', lat: 22.54, lng: 114.05, type: 'container', volume: '30.0M TEU', rank: 4 },
-  { name: 'Guangzhou', country: 'CN', lat: 23.08, lng: 113.32, type: 'container', volume: '24.2M TEU', rank: 5 },
-  { name: 'Busan', country: 'KR', lat: 35.10, lng: 129.04, type: 'container', volume: '22.7M TEU', rank: 6 },
-  { name: 'Qingdao', country: 'CN', lat: 36.07, lng: 120.38, type: 'container', volume: '22.0M TEU', rank: 7 },
-  { name: 'Rotterdam', country: 'NL', lat: 51.90, lng: 4.50, type: 'container', volume: '14.5M TEU', rank: 8 },
-  { name: 'Dubai (Jebel Ali)', country: 'AE', lat: 25.01, lng: 55.06, type: 'container', volume: '14.0M TEU', rank: 9 },
-  { name: 'Port Klang', country: 'MY', lat: 2.99, lng: 101.39, type: 'container', volume: '13.2M TEU', rank: 10 },
-  { name: 'Antwerp', country: 'BE', lat: 51.30, lng: 4.40, type: 'container', volume: '12.0M TEU', rank: 11 },
-  { name: 'Xiamen', country: 'CN', lat: 24.48, lng: 118.09, type: 'container', volume: '11.4M TEU', rank: 12 },
-  { name: 'Hamburg', country: 'DE', lat: 53.55, lng: 9.97, type: 'container', volume: '8.7M TEU', rank: 14 },
-  { name: 'Los Angeles', country: 'US', lat: 33.74, lng: -118.27, type: 'container', volume: '9.9M TEU', rank: 13 },
-  { name: 'Long Beach', country: 'US', lat: 33.75, lng: -118.19, type: 'container', volume: '8.0M TEU', rank: 15 },
-  { name: 'Tanjung Pelepas', country: 'MY', lat: 1.36, lng: 103.55, type: 'container', volume: '9.8M TEU', rank: 16 },
-  { name: 'Savannah', country: 'US', lat: 32.08, lng: -81.09, type: 'container', volume: '5.6M TEU', rank: 20 },
-  { name: 'Felixstowe', country: 'GB', lat: 51.96, lng: 1.35, type: 'container', volume: '3.8M TEU', rank: 25 },
-  { name: 'Santos', country: 'BR', lat: -23.95, lng: -46.31, type: 'container', volume: '4.2M TEU', rank: 22 },
-  { name: 'Colombo', country: 'LK', lat: 6.94, lng: 79.84, type: 'container', volume: '7.2M TEU', rank: 17 },
+import { NextResponse } from 'next/server';
 
-  // ── Energy/Oil Ports ──
-  { name: 'Ras Tanura', country: 'SA', lat: 26.64, lng: 50.16, type: 'energy', volume: '6.5M bpd' },
-  { name: 'Fujairah', country: 'AE', lat: 25.14, lng: 56.35, type: 'energy', volume: '3.5M bpd' },
-  { name: 'Novorossiysk', country: 'RU', lat: 44.72, lng: 37.77, type: 'energy', volume: '2.8M bpd' },
-  { name: 'Houston Ship Channel', country: 'US', lat: 29.73, lng: -95.27, type: 'energy', volume: '2.5M bpd' },
-  { name: 'Kharg Island', country: 'IR', lat: 29.24, lng: 50.33, type: 'energy', volume: '2.0M bpd' },
-  { name: 'Primorsk', country: 'RU', lat: 60.35, lng: 28.70, type: 'energy', volume: '1.6M bpd' },
+interface Ship {
+  mmsi: number;
+  name: string;
+  lat: number;
+  lng: number;
+  speed: number;
+  heading: number;
+  type: string;
+  typeCode: number;
+  length: number;
+  destination: string;
+  color: string;
+  timestamp: string;
+}
 
-  // ── Major Naval Bases ──
-  { name: 'Norfolk Naval Station', country: 'US', lat: 36.95, lng: -76.33, type: 'naval', fleet: 'US Atlantic Fleet' },
-  { name: 'San Diego Naval Base', country: 'US', lat: 32.69, lng: -117.15, type: 'naval', fleet: 'US Pacific Fleet' },
-  { name: 'Pearl Harbor', country: 'US', lat: 21.35, lng: -157.97, type: 'naval', fleet: 'US Pacific Fleet' },
-  { name: 'Yokosuka', country: 'JP', lat: 35.28, lng: 139.67, type: 'naval', fleet: 'US 7th Fleet' },
-  { name: 'Severomorsk', country: 'RU', lat: 69.07, lng: 33.42, type: 'naval', fleet: 'Russian Northern Fleet' },
-  { name: 'Tartus', country: 'SY', lat: 34.89, lng: 35.89, type: 'naval', fleet: 'Russian Mediterranean' },
-  { name: 'Zhanjiang', country: 'CN', lat: 21.20, lng: 110.39, type: 'naval', fleet: 'PLA Navy South Sea Fleet' },
-  { name: 'Qingdao Naval', country: 'CN', lat: 36.09, lng: 120.43, type: 'naval', fleet: 'PLA Navy North Sea Fleet' },
-  { name: 'Portsmouth', country: 'GB', lat: 50.80, lng: -1.11, type: 'naval', fleet: 'Royal Navy' },
-  { name: 'Toulon', country: 'FR', lat: 43.12, lng: 5.93, type: 'naval', fleet: 'French Navy Mediterranean' },
-  { name: 'Changi Naval Base', country: 'SG', lat: 1.33, lng: 104.01, type: 'naval', fleet: 'Republic of Singapore Navy' },
-  { name: 'Visakhapatnam', country: 'IN', lat: 17.69, lng: 83.30, type: 'naval', fleet: 'Indian Navy Eastern Command' },
-  { name: 'Mumbai Naval', country: 'IN', lat: 18.93, lng: 72.84, type: 'naval', fleet: 'Indian Navy Western Command' },
+// Ship type configurations
+const SHIP_CONFIGS: Record<string, { color: string; lengthMin: number; lengthMax: number; speedMax: number }> = {
+  tanker: { color: '#EF5350', lengthMin: 150, lengthMax: 400, speedMax: 18 },
+  cargo: { color: '#FFA726', lengthMin: 80, lengthMax: 300, speedMax: 22 },
+  passenger: { color: '#29B6F6', lengthMin: 50, lengthMax: 350, speedMax: 28 },
+  fishing: { color: '#66BB6A', lengthMin: 10, lengthMax: 80, speedMax: 12 },
+  military: { color: '#FF3D3D', lengthMin: 100, lengthMax: 350, speedMax: 35 },
+  pleasure: { color: '#AB47BC', lengthMin: 5, lengthMax: 50, speedMax: 25 },
+  other: { color: '#90A4AE', lengthMin: 20, lengthMax: 150, speedMax: 20 },
+};
+
+const DESTINATIONS = ['Rotterdam', 'Singapore', 'Shanghai', 'Dubai', 'Hamburg', 'Antwerp', 'Los Angeles', 'Tokyo', 'New York', 'Busan', 'Hong Kong', 'Jeddah', 'Cape Town', 'Sydney', 'Vancouver', 'Panama', 'Suez', 'Istanbul', 'Mumbai', 'Oslo'];
+
+// Generate ship name
+function generateShipName(type: string): string {
+  const prefixes: Record<string, string[]> = {
+    tanker: ['MT', 'MT', 'ST'],
+    cargo: ['MV', 'MV', 'CS'],
+    passenger: ['SS', 'MS', 'MV'],
+    fishing: ['FV', 'FV', 'FV'],
+    military: ['USS', 'HMS', 'INS'],
+    pleasure: ['SY', 'SY', '']
+  };
+  const cities = ['Atlantic', 'Pacific', 'Baltic', 'Nordic', 'Star', 'Fortune', 'Hope', 'Unity', 'Voyager', 'Pioneer', 'Ocean', 'Seas', 'Pearl', 'Diamond', 'Royal'];
+  const prefix = prefixes[type]?.[Math.floor(Math.random() * prefixes[type].length)] || 'MV';
+  return `${prefix} ${cities[Math.floor(Math.random() * cities.length)]}`;
+}
+
+// Major shipping routes with traffic density
+const SHIPPING_ROUTES = [
+  // Asia - Europe (via Suez)
+  { start: { lat: 31.2, lng: 121.5 }, end: { lat: 31.5, lng: 32.0 }, count: 80, types: ['cargo', 'tanker'] }, // Shanghai -> Suez
+  { start: { lat: 1.3, lng: 103.8 }, end: { lat: 26.5, lng: 56.3 }, count: 60, types: ['tanker', 'cargo'] }, // Singapore -> Hormuz
+  { start: { lat: 35.7, lng: 139.7 }, end: { lat: 37.8, lng: -122.4 }, count: 30, types: ['cargo', 'passenger'] }, // Tokyo -> SF
+  
+  // Europe - Americas
+  { start: { lat: 50.5, lng: -1.0 }, end: { lat: 40.7, lng: -74.0 }, count: 50, types: ['cargo', 'passenger'] }, // UK -> NYC
+  { start: { lat: 51.5, lng: 1.5 }, end: { lat: 36.0, lng: -5.5 }, count: 40, types: ['cargo', 'tanker'] }, // North Sea -> Gibraltar
+  
+  // Intra-Asia
+  { start: { lat: 22.4, lng: 114.1 }, end: { lat: 1.3, lng: 103.8 }, count: 45, types: ['cargo', 'tanker'] }, // HK -> Singapore
+  { start: { lat: 12.9, lng: 77.6 }, end: { lat: 1.3, lng: 103.8 }, count: 35, types: ['cargo', 'tanker'] }, // India -> Singapore
+  { start: { lat: 35.0, lng: 139.5 }, end: { lat: 37.5, lng: 126.9 }, count: 25, types: ['cargo', 'passenger'] }, // Tokyo -> Busan
+  
+  // Americas
+  { start: { lat: 37.8, lng: -122.4 }, end: { lat: 34.0, lng: -118.2 }, count: 20, types: ['cargo', 'passenger'] }, // SF -> LA
+  { start: { lat: 40.7, lng: -74.0 }, end: { lat: 25.8, lng: -80.2 }, count: 30, types: ['passenger', 'cargo'] }, // NYC -> Miami
+  { start: { lat: -23.0, lng: -43.4 }, end: { lat: -34.6, lng: -58.4 }, count: 25, types: ['cargo'] }, // Brazil -> Argentina
+  
+  // Africa routes
+  { start: { lat: -33.9, lng: 18.4 }, end: { lat: 31.2, lng: 29.9 }, count: 20, types: ['cargo', 'tanker'] }, // Cape Town -> Suez
+  { start: { lat: -1.3, lng: 36.8 }, end: { lat: 25.3, lng: 55.2 }, count: 15, types: ['cargo'] }, // Mombasa -> Dubai
 ];
 
-const CHOKEPOINTS = [
-  { name: 'Strait of Hormuz', lat: 26.57, lng: 56.25, traffic: '21M bpd oil', risk: 'HIGH' },
-  { name: 'Strait of Malacca', lat: 2.50, lng: 101.50, traffic: '16M bpd oil', risk: 'MODERATE' },
-  { name: 'Suez Canal', lat: 30.43, lng: 32.34, traffic: '12% world trade', risk: 'ELEVATED' },
-  { name: 'Bab el-Mandeb', lat: 12.58, lng: 43.33, traffic: '6.2M bpd oil', risk: 'CRITICAL' },
-  { name: 'Panama Canal', lat: 9.08, lng: -79.68, traffic: '5% world trade', risk: 'LOW' },
-  { name: 'Turkish Straits', lat: 41.12, lng: 29.07, traffic: '3M bpd oil', risk: 'MODERATE' },
-  { name: 'Danish Straits', lat: 55.70, lng: 12.60, traffic: '3.2M bpd oil', risk: 'LOW' },
-  { name: 'Cape of Good Hope', lat: -34.36, lng: 18.47, traffic: 'Alt route Suez', risk: 'LOW' },
-  { name: 'Taiwan Strait', lat: 24.00, lng: 119.00, traffic: '88% large ships', risk: 'ELEVATED' },
-  { name: 'Lombok Strait', lat: -8.47, lng: 115.72, traffic: 'Alt Malacca', risk: 'LOW' },
-];
+function interpolatePosition(start: {lat: number, lng: number}, end: {lat: number, lng: number}, progress: number) {
+  return {
+    lat: start.lat + (end.lat - start.lat) * progress,
+    lng: start.lng + (end.lng - start.lng) * progress,
+  };
+}
+
+function generateShipsOnRoute(route: typeof SHIPPING_ROUTES[0]): Ship[] {
+  const ships: Ship[] = [];
+  const config = SHIP_CONFIGS[route.types[0]] || SHIP_CONFIGS.other;
+  
+  for (let i = 0; i < route.count; i++) {
+    const type = route.types[Math.floor(Math.random() * route.types.length)];
+    const typeConfig = SHIP_CONFIGS[type] || SHIP_CONFIGS.other;
+    
+    // Distribute ships along the route
+    const progress = Math.random();
+    const jitterLat = (Math.random() - 0.5) * 4;
+    const jitterLng = (Math.random() - 0.5) * 4;
+    
+    const pos = interpolatePosition(route.start, route.end, progress);
+    
+    // Calculate heading towards destination
+    const dLat = route.end.lat - route.start.lat;
+    const dLng = route.end.lng - route.start.lng;
+    const heading = Math.round((Math.atan2(dLng, dLat) * 180 / Math.PI + 360) % 360);
+    
+    // Chokepoint clustering
+    ships.push({
+      mmsi: 200000000 + Math.floor(Math.random() * 800000000),
+      name: generateShipName(type),
+      lat: pos.lat + jitterLat,
+      lng: pos.lng + jitterLng,
+      speed: Math.round((1 + Math.random() * typeConfig.speedMax) * 10) / 10,
+      heading: heading + Math.floor((Math.random() - 0.5) * 30),
+      type,
+      typeCode: type === 'tanker' ? 80 : type === 'cargo' ? 70 : type === 'passenger' ? 60 : 30,
+      length: Math.floor(typeConfig.lengthMin + Math.random() * (typeConfig.lengthMax - typeConfig.lengthMin)),
+      destination: DESTINATIONS[Math.floor(Math.random() * DESTINATIONS.length)],
+      color: typeConfig.color,
+      timestamp: new Date().toISOString(),
+    });
+  }
+  
+  return ships;
+}
+
+// In-memory cache
+let cachedShips: Ship[] | null = null;
+let lastFetchTime = 0;
+const CACHE_TTL = 60000; // 60 seconds
 
 export async function GET() {
+  const now = Date.now();
+  
+  if (cachedShips && now - lastFetchTime < CACHE_TTL) {
+    return NextResponse.json({
+      ships: cachedShips,
+      count: cachedShips.length,
+      timestamp: new Date().toISOString(),
+      source: 'AIS Simulation',
+    }, {
+      headers: { 'Cache-Control': 'public, s-maxage=30' },
+    });
+  }
+  
+  // Generate ships on all routes
+  const allShips: Ship[] = [];
+  for (const route of SHIPPING_ROUTES) {
+    allShips.push(...generateShipsOnRoute(route));
+  }
+  
+  // Add some random fishing vessels
+  for (let i = 0; i < 100; i++) {
+    const config = SHIP_CONFIGS.fishing;
+    allShips.push({
+      mmsi: 400000000 + i,
+      name: generateShipName('fishing'),
+      lat: (Math.random() * 140 - 70), // -70 to 70 latitude
+      lng: (Math.random() * 360 - 180),
+      speed: Math.round((1 + Math.random() * 10) * 10) / 10,
+      heading: Math.floor(Math.random() * 360),
+      type: 'fishing',
+      typeCode: 30,
+      length: Math.floor(config.lengthMin + Math.random() * (config.lengthMax - config.lengthMin)),
+      destination: 'Fishing Grounds',
+      color: config.color,
+      timestamp: new Date().toISOString(),
+    });
+  }
+  
+  cachedShips = allShips;
+  lastFetchTime = now;
+  
+  // Stats by type
+  const stats = {
+    total: allShips.length,
+    byType: {} as Record<string, number>,
+  };
+  
+  for (const ship of allShips) {
+    stats.byType[ship.type] = (stats.byType[ship.type] || 0) + 1;
+  }
+  
   return NextResponse.json({
-    ports: PORTS,
-    chokepoints: CHOKEPOINTS,
-    total_ports: PORTS.length,
-    total_chokepoints: CHOKEPOINTS.length,
+    ships: allShips,
+    count: allShips.length,
+    stats,
     timestamp: new Date().toISOString(),
+    source: 'AIS Maritime Traffic Simulation',
+    routes: SHIPPING_ROUTES.length,
   }, {
-    headers: { 'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=172800' },
+    headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' },
   });
 }
